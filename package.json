@@ -12,7 +12,9 @@
   "author": "Marco Fernstaedt",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.18.2"
+    "express": "^4.18.2",
+    "mongoose": "^6.6.1",
+    "validator": "^13.11.0"
   },
   "devDependencies": {
     "eslint": "^8.54.0",
