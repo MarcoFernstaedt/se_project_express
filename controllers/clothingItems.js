@@ -1,7 +1,7 @@
 const ClothingItems = require('../models/clothingItem');
 
 module.exports.getClothingItems = (req, res) => {
-  ClothingItems.find(req.body)
+  ClothingItems.find({})
 };
 
 module.exports.createClothingItem = (req, res) => {
