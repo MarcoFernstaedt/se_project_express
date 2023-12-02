@@ -56,3 +56,45 @@ module.exports.deleteClothingItem = async (req, res) => {
     }
   }
 };
+
+module.exports.likeItem = async (req, res) => {
+  try {
+    const itemId = req.params.itemId;
+    const userId = req.user._id;
+
+    const updatedItem = await ClothingItems.findByIdAndUpdate(
+      itemId,
+      { $addToSet: { likes: userId } },
+      { new: true }
+    );
+
+    res.send({ data: updatedItem });
+  } catch (err) {
+    console.error(
+      `Error ${err.name} with the message ${err.message} has occurred while executing the code`,
+    );
+
+    res.status(SERVER_ERROR).send({ message: "An error has occurred on the server." });
+  }
+};
+
+module.exports.dislikeItem = async (req, res) => {
+  try {
+    const itemId = req.params.itemId;
+    const userId = req.user._id;
+
+    const updatedItem = await ClothingItems.findByIdAndUpdate(
+      itemId,
+      { $pull: { likes: userId } },
+      { new: true }
+    );
+
+    res.send({ data: updatedItem });
+  } catch (err) {
+    console.error(
+      `Error ${err.name} with the message ${err.message} has occurred while executing the code`,
+    );
+
+    res.status(SERVER_ERROR).send({ message: "An error has occurred on the server." });
+  }
+};
