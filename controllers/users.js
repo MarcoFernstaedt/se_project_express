@@ -1,5 +1,5 @@
 const Users = require("../models/user");
-const { USER_NOT_FOUND, SERVER_ERROR, INVALID_DATA } = require('../utils/errors');
+const { NOT_FOUND, SERVER_ERROR, INVALID_DATA } = require('../utils/errors');
 
 const getUsers = async (req, res) => {
   try {
@@ -17,7 +17,7 @@ const getUser = async (req, res) => {
     if (user) {
       res.send({ data: user });
     } else {
-      res.status(USER_NOT_FOUND).send({ message: 'User not found' });
+      res.status(NOT_FOUND).send({ message: 'User not found' });
     }
   } catch (err) {
     console.error(`Error ${err.name} with the message ${err.message} has occurred while executing the code`);
