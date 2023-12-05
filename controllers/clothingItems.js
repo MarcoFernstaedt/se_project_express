@@ -10,10 +10,10 @@ module.exports.getClothingItems = async (req, res) => {
       `Error ${err.name} with the message ${err.message} has occurred while executing the code`,
     );
 
-    if (err.name === "DocumentNotFoundError") {
-      res.status(NOT_FOUND).send({ message: "Requested clothing item not found" });
+    if (err.name === 'CastError') {
+      res.status(INVALID_DATA).send({ message: 'Invalid user ID provided' });
     } else {
-      res.status(SERVER_ERROR).send({ message: "An error has occurred on the server." });
+      res.status(SERVER_ERROR).send({ message: 'An error has occurred on the server.' });
     }
   }
 };
