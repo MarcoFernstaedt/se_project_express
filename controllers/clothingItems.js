@@ -20,10 +20,10 @@ module.exports.getClothingItems = async (req, res) => {
 
 module.exports.createClothingItem = async (req, res) => {
   try {
-    const { name, weatherType, imageUrl } = req.body;
+    const { name, weather, imageUrl } = req.body;
     const userId = req.user._id;
 
-    const item = await ClothingItems.create({ name, weatherType, imageUrl, owner: userId });
+    const item = await ClothingItems.create({ name, weather, imageUrl, owner: userId });
     res.send({ data: item });
   } catch (err) {
     console.error(
