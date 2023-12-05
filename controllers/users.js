@@ -21,7 +21,13 @@ const getUser = async (req, res) => {
     }
   } catch (err) {
     console.error(`Error ${err.name} with the message ${err.message} has occurred while executing the code`);
-    res.status(SERVER_ERROR).send({ message: 'An error has occurred on the server.' });
+    if (err.name === 'CastError') {
+      res.status(INVALID_DATA).send({ message: 'Invalid user ID provided' });
+    } else if  (err.name === 'AssertionError') {
+      res.status(NOT_FOUND).send({ message: 'Invalid user ID provided' });
+    } else {
+      res.status(SERVER_ERROR).send({ message: 'An error has occurred on the server.' });
+    }
   }
 };
 

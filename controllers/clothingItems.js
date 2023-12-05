@@ -89,6 +89,11 @@ module.exports.dislikeItem = async (req, res) => {
       { new: true }
     );
 
+    if (!updatedItem) {
+      res.status(NOT_FOUND).send({ message: "Requested clothing item not found" });
+      return;
+    }
+
     res.send({ data: updatedItem });
   } catch (err) {
     console.error(
