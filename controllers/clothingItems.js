@@ -12,8 +12,10 @@ module.exports.getClothingItems = async (req, res) => {
 
     if (err.name === 'CastError') {
       res.status(INVALID_DATA).send({ message: 'Invalid user ID provided' });
+      return;
     } else {
       res.status(SERVER_ERROR).send({ message: 'An error has occurred on the server.' });
+      return;
     }
   }
 };
@@ -34,8 +36,10 @@ module.exports.createClothingItem = async (req, res) => {
       res.status(INVALID_DATA).send({
         message: "Invalid data provided for creating a clothing item",
       });
+      return;
     } else {
       res.status(SERVER_ERROR).send({ message: "An error has occurred on the server." });
+      return;
     }
   }
 };
@@ -51,8 +55,10 @@ module.exports.deleteClothingItem = async (req, res) => {
 
     if (err.name === "DocumentNotFoundError") {
       res.status(NOT_FOUND).send({ message: "Requested clothing item not found" });
+      return;
     } else {
       res.status(SERVER_ERROR).send({ message: "An error has occurred on the server." });
+      return;
     }
   }
 };
@@ -75,10 +81,13 @@ module.exports.likeItem = async (req, res) => {
     );
     if (err.name === 'ValidationError') {
       res.status(NOT_FOUND).send({ message: "Invalid Data was provided."})
+      return;
     } else if (err.name === 'CastError') {
       res.status(INVALID_DATA).send({ message: "Item cannot be found."})
+      return;
     } else {
       res.status(SERVER_ERROR).send({ message: "An error has occurred on the server." });
+      return;
     }
   }
 };
@@ -104,7 +113,15 @@ module.exports.dislikeItem = async (req, res) => {
     console.error(
       `Error ${err.name} with the message ${err.message} has occurred while executing the code`,
     );
-
-    res.status(SERVER_ERROR).send({ message: "An error has occurred on the server." });
+    if (err.name === 'ValidationError') {
+      res.status(NOT_FOUND).send({ message: "Invalid Data was provided."})
+      return;
+    } else if (err.name === 'CastError') {
+      res.status(INVALID_DATA).send({ message: "Item cannot be found."})
+      return;
+    } else {
+      res.status(SERVER_ERROR).send({ message: "An error has occurred on the server." });
+      return;
+    }
   }
 };

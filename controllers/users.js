@@ -23,8 +23,10 @@ const getUser = async (req, res) => {
     console.error(`Error ${err.name} with the message ${err.message} has occurred while executing the code`);
     if (err.name === 'CastError') {
       res.status(INVALID_DATA).send({ message: 'Invalid user ID provided' });
+      return;
     } else {
       res.status(SERVER_ERROR).send({ message: 'An error has occurred on the server.' });
+      return;
     }
   }
 };
@@ -38,8 +40,10 @@ const createUser = async (req, res) => {
     console.error(`Error ${err.name} with the message ${err.message} has occurred while executing the code`);
     if (err.name === 'ValidationError') {
       res.status(INVALID_DATA).send({ message: 'Invalid data provided for creating a user' });
+      return;
     } else {
       res.status(SERVER_ERROR).send({ message: 'An error has occurred on the server.' });
+      return;
     }
   }
 };
