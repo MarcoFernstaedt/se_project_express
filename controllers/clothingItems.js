@@ -73,9 +73,9 @@ module.exports.likeItem = async (req, res) => {
     console.error(
       `Error ${err.name} with the message ${err.message} has occurred while executing the code`,
     );
-    if (error.name === 'ValidationError') {
+    if (err.name === 'ValidationError') {
       res.status(NOT_FOUND).send({ message: "Invalid Data was provided."})
-    } else if (error.name === 'CastError') {
+    } else if (err.name === 'CastError') {
       res.status(INVALID_DATA).send({ message: "Item cannot be found."})
     } else {
       res.status(SERVER_ERROR).send({ message: "An error has occurred on the server." });
