@@ -64,18 +64,11 @@ module.exports.deleteClothingItem = async (req, res) => {
     const item = await ClothingItems.findByIdAndDelete(req.params.id)
       .orFail(() => {
         const error = new Error("Item ID not found");
-        error.statusCode = 404;
+        error.statusCode = NOT_FOUND;
         throw error;
-      })
-      .then((item) => {
-        res.status(OK).send({ data: item });
       });
 
-    // if (!item) {
-    //   // Item not found, return a 404 response
-    //   res.status(NOT_FOUND).send({ message: "Requested clothing item not found" });
-    //   return;
-    // }
+    res.status(OK).send({ data: item });
   } catch (err) {
     console.error(
       `Error deleteClothingItem ${err.name} with the message ${err.message} has occurred while executing the code`,
@@ -95,6 +88,7 @@ module.exports.deleteClothingItem = async (req, res) => {
   }
 };
 
+
 module.exports.likeItem = async (req, res) => {
   try {
     const itemId = req.params.itemId;
@@ -109,10 +103,16 @@ module.exports.likeItem = async (req, res) => {
         const error = new Error("Item ID not found");
         error.statusCode = NOT_FOUND;
         throw error;
-      })
-      .then((updatedItem) => {
-        res.status(OK).send({ data: updatedItem });
       });
+
+    // Check if the item exists and was updated
+    if (!updatedItem) {
+      const error = new Error("Item ID not found");
+      error.statusCode = NOT_FOUND;
+      throw error;
+    }
+
+    res.status(OK).send({ data: updatedItem });
   } catch (err) {
     console.error(
       `Error likeItem ${err.name} with the message ${err.message} has occurred while executing the code`,
@@ -144,32 +144,24 @@ module.exports.dislikeItem = async (req, res) => {
     )
       .orFail(() => {
         const error = new Error("Item ID not found");
-        error.statusCode = 400;
+        error.statusCode = INVALID_DATA;
         throw error;
-      })
-      .then((updatedItem) => {
-        res.status(OK).send({ data: updatedItem });
       });
 
-    // if (!updatedItem) {
-    //   res.status(NOT_FOUND).send({ message: "Requested clothing item not found" });
-    //   return;
-    // }
+    res.status(OK).send({ data: updatedItem });
   } catch (err) {
     console.error(
       `Error dislikeItem ${err.name} with the message ${err.message} has occurred while executing the code`,
     );
 
     if (err.name === "ValidationError" || err.name === "CastError") {
-      res
-        .status(NOT_FOUND)
-        .send({ message: "Invalid Data or Item not found." });
-      return;
+      res.status(INVALID_DATA).send({ message: "Invalid Data or Item not found." }); // Change status code to 400
+    } else if (err.name === "DocumentNotFoundError") {
+      res.status(NOT_FOUND).send({ message: "Item not found." });
     } else {
       res
         .status(SERVER_ERROR)
         .send({ message: "An error has occurred on the server." });
-      return;
     }
   }
 };
