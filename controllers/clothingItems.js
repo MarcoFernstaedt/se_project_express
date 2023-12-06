@@ -7,7 +7,7 @@ module.exports.getClothingItems = async (req, res) => {
     res.send({ data: items });
   } catch (err) {
     console.error(
-      `Error ${err.name} with the message ${err.message} has occurred while executing the code`,
+      `Error getClothingItems ${err.name} with the message ${err.message} has occurred while executing the code`,
     );
 
     if (err.name === 'CastError') {
@@ -47,18 +47,25 @@ module.exports.createClothingItem = async (req, res) => {
 module.exports.deleteClothingItem = async (req, res) => {
   try {
     const item = await ClothingItems.findByIdAndDelete(req.params.id);
-    res.send({ data: item });
-  } catch (err) {
-    console.error(
-      `Error ${err.name} with the message ${err.message} has occurred while executing the code`,
-    );
 
-    if (err.name === "DocumentNotFoundError") {
+    if (!item) {
+      // Item not found, return a 404 response
       res.status(NOT_FOUND).send({ message: "Requested clothing item not found" });
       return;
+    }
+
+    res.status(OK).send({ data: item });
+  } catch (err) {
+    console.error(
+      `Error deleteClothingItem ${err.name} with the message ${err.message} has occurred while executing the code`,
+    );
+
+    if (err.name === "CastError") {
+      // Invalid ID provided, return a 400 response
+      res.status(INVALID_DATA).send({ message: "Invalid clothing item ID provided" });
     } else {
+      // Other errors, return a 500 response
       res.status(SERVER_ERROR).send({ message: "An error has occurred on the server." });
-      return;
     }
   }
 };
@@ -77,7 +84,7 @@ module.exports.likeItem = async (req, res) => {
     res.status(OK).send({ data: updatedItem });
   } catch (err) {
     console.error(
-      `Error ${err.name} with the message ${err.message} has occurred while executing the code`,
+      `Error likeItem ${err.name} with the message ${err.message} has occurred while executing the code`,
     );
     if (err.name === 'ValidationError') {
       res.status(NOT_FOUND).send({ message: "Invalid Data was provided."})
@@ -111,13 +118,11 @@ module.exports.dislikeItem = async (req, res) => {
     res.status(OK).send({ data: updatedItem });
   } catch (err) {
     console.error(
-      `Error ${err.name} with the message ${err.message} has occurred while executing the code`,
+      `Error dislikeItem ${err.name} with the message ${err.message} has occurred while executing the code`,
     );
-    if (err.name === 'ValidationError') {
-      res.status(NOT_FOUND).send({ message: "Invalid Data was provided."})
-      return;
-    } else if (err.name === 'CastError') {
-      res.status(INVALID_DATA).send({ message: "Item cannot be found."})
+
+    if (err.name === 'ValidationError' || err.name === 'CastError') {
+      res.status(NOT_FOUND).send({ message: "Invalid Data or Item not found." });
       return;
     } else {
       res.status(SERVER_ERROR).send({ message: "An error has occurred on the server." });
