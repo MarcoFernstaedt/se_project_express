@@ -1,5 +1,5 @@
 const ClothingItems = require("../models/clothingItem");
-const { INVALID_DATA, NOT_FOUND, SERVER_ERROR } = require("../utils/errors");
+const { INVALID_DATA, NOT_FOUND, SERVER_ERROR, CREATED } = require("../utils/errors");
 
 module.exports.getClothingItems = async (req, res) => {
   try {
@@ -24,7 +24,7 @@ module.exports.createClothingItem = async (req, res) => {
     const userId = req.user._id;
 
     const item = await ClothingItems.create({ name, weather, imageUrl, owner: userId });
-    res.send({ data: item });
+    res.status(CREATED).send({ data: item });
   } catch (err) {
     console.error(
       `Error ${err.name} with the message ${err.message} has occurred while executing the code`,
