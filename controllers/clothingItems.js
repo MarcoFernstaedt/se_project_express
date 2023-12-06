@@ -12,18 +12,16 @@ module.exports.getClothingItems = async (req, res) => {
     const items = await ClothingItems.find({});
     res.send({ data: items });
   } catch (err) {
-    console.error(
-      `Error getClothingItems ${err.name} with the message ${err.message} has occurred while executing the code`,
-    );
+    // console.error(
+    //   `Error getClothingItems ${err.name} with the message ${err.message} has occurred while executing the code`,
+    // );
 
     if (err.name === "CastError") {
       res.status(INVALID_DATA).send({ message: "Invalid user ID provided" });
-      return;
     } else {
       res
         .status(SERVER_ERROR)
         .send({ message: "An error has occurred on the server." });
-      return;
     }
   }
 };
@@ -41,38 +39,37 @@ module.exports.createClothingItem = async (req, res) => {
     });
     res.status(CREATED).send({ data: item });
   } catch (err) {
-    console.error(
-      `Error ${err.name} with the message ${err.message} has occurred while executing the code`,
-    );
+    // console.error(
+    //   `Error ${err.name} with the message ${err.message} has occurred while executing the code`,
+    // );
 
     if (err.name === "ValidationError") {
       res.status(INVALID_DATA).send({
         message: "Invalid data provided for creating a clothing item",
       });
-      return;
     } else {
       res
         .status(SERVER_ERROR)
         .send({ message: "An error has occurred on the server." });
-      return;
     }
   }
 };
 
 module.exports.deleteClothingItem = async (req, res) => {
   try {
-    const item = await ClothingItems.findByIdAndDelete(req.params.id)
-      .orFail(() => {
+    const item = await ClothingItems.findByIdAndDelete(req.params.id).orFail(
+      () => {
         const error = new Error("Item ID not found");
         error.statusCode = NOT_FOUND;
         throw error;
-      });
+      },
+    );
 
     res.status(OK).send({ data: item });
   } catch (err) {
-    console.error(
-      `Error deleteClothingItem ${err.name} with the message ${err.message} has occurred while executing the code`,
-    );
+    // console.error(
+    //   `Error deleteClothingItem ${err.name} with the message ${err.message} has occurred while executing the code`,
+    // );
 
     if (err.name === "CastError") {
       // Invalid ID provided, return a 400 response
@@ -88,28 +85,24 @@ module.exports.deleteClothingItem = async (req, res) => {
   }
 };
 
-
 module.exports.likeItem = async (req, res) => {
   try {
-    const itemId = req.params.itemId;
+    const { itemId } = req.params;
     const userId = req.user._id;
 
     const updatedItem = await ClothingItems.findByIdAndUpdate(
       itemId,
       { $addToSet: { likes: userId } },
       { new: true },
-    )
-      .orFail(() => {
-        const error = new Error("Item ID not found");
-        error.statusCode = NOT_FOUND;
-        throw error;
-      });
-
-    // Check if the item exists and was updated
-    if (!updatedItem) {
+    ).orFail(() => {
       const error = new Error("Item ID not found");
       error.statusCode = NOT_FOUND;
       throw error;
+    });
+
+    // Check if the item exists and was updated
+    if (updatedItem === null) {
+      return res.status(NOT_FOUND).send({ message: "invalid id" });
     }
 
     res.status(OK).send({ data: updatedItem });
@@ -117,45 +110,44 @@ module.exports.likeItem = async (req, res) => {
     console.error(
       `Error likeItem ${err.name} with the message ${err.message} has occurred while executing the code`,
     );
+
     if (err.name === "ValidationError") {
       res.status(NOT_FOUND).send({ message: "Invalid Data was provided." });
-      return;
     } else if (err.name === "CastError") {
       res.status(INVALID_DATA).send({ message: "Item cannot be found." });
-      return;
     } else {
       res
         .status(SERVER_ERROR)
         .send({ message: "An error has occurred on the server." });
-      return;
     }
   }
 };
 
 module.exports.dislikeItem = async (req, res) => {
   try {
-    const itemId = req.params.itemId;
+    const { itemId } = req.params;
     const userId = req.user._id;
 
     const updatedItem = await ClothingItems.findByIdAndUpdate(
       itemId,
       { $pull: { likes: userId } },
       { new: true },
-    )
-      .orFail(() => {
-        const error = new Error("Item ID not found");
-        error.statusCode = INVALID_DATA;
-        throw error;
-      });
+    ).orFail(() => {
+      const error = new Error("Item ID not found");
+      error.statusCode = INVALID_DATA;
+      throw error;
+    });
 
     res.status(OK).send({ data: updatedItem });
   } catch (err) {
-    console.error(
-      `Error dislikeItem ${err.name} with the message ${err.message} has occurred while executing the code`,
-    );
+    // console.error(
+    //   `Error dislikeItem ${err.name} with the message ${err.message} has occurred while executing the code`,
+    // );
 
     if (err.name === "ValidationError" || err.name === "CastError") {
-      res.status(INVALID_DATA).send({ message: "Invalid Data or Item not found." }); // Change status code to 400
+      res
+        .status(INVALID_DATA)
+        .send({ message: "Invalid Data or Item not found." }); // Change status code to 400
     } else if (err.name === "DocumentNotFoundError") {
       res.status(NOT_FOUND).send({ message: "Item not found." });
     } else {
