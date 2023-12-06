@@ -1,5 +1,11 @@
 const ClothingItems = require("../models/clothingItem");
-const { INVALID_DATA, NOT_FOUND, SERVER_ERROR, CREATED, OK } = require("../utils/errors");
+const {
+  INVALID_DATA,
+  NOT_FOUND,
+  SERVER_ERROR,
+  CREATED,
+  OK,
+} = require("../utils/errors");
 
 module.exports.getClothingItems = async (req, res) => {
   try {
@@ -10,11 +16,13 @@ module.exports.getClothingItems = async (req, res) => {
       `Error getClothingItems ${err.name} with the message ${err.message} has occurred while executing the code`,
     );
 
-    if (err.name === 'CastError') {
-      res.status(INVALID_DATA).send({ message: 'Invalid user ID provided' });
+    if (err.name === "CastError") {
+      res.status(INVALID_DATA).send({ message: "Invalid user ID provided" });
       return;
     } else {
-      res.status(SERVER_ERROR).send({ message: 'An error has occurred on the server.' });
+      res
+        .status(SERVER_ERROR)
+        .send({ message: "An error has occurred on the server." });
       return;
     }
   }
@@ -25,7 +33,12 @@ module.exports.createClothingItem = async (req, res) => {
     const { name, weather, imageUrl } = req.body;
     const userId = req.user._id;
 
-    const item = await ClothingItems.create({ name, weather, imageUrl, owner: userId });
+    const item = await ClothingItems.create({
+      name,
+      weather,
+      imageUrl,
+      owner: userId,
+    });
     res.status(CREATED).send({ data: item });
   } catch (err) {
     console.error(
@@ -38,7 +51,9 @@ module.exports.createClothingItem = async (req, res) => {
       });
       return;
     } else {
-      res.status(SERVER_ERROR).send({ message: "An error has occurred on the server." });
+      res
+        .status(SERVER_ERROR)
+        .send({ message: "An error has occurred on the server." });
       return;
     }
   }
@@ -46,15 +61,21 @@ module.exports.createClothingItem = async (req, res) => {
 
 module.exports.deleteClothingItem = async (req, res) => {
   try {
-    const item = await ClothingItems.findByIdAndDelete(req.params.id);
+    const item = await ClothingItems.findByIdAndDelete(req.params.id)
+      .orFail(() => {
+        const error = new Error("Item ID not found");
+        error.statusCode = 404;
+        throw error;
+      })
+      .then((item) => {
+        res.status(OK).send({ data: item });
+      });
 
-    if (!item) {
-      // Item not found, return a 404 response
-      res.status(NOT_FOUND).send({ message: "Requested clothing item not found" });
-      return;
-    }
-
-    res.status(OK).send({ data: item });
+    // if (!item) {
+    //   // Item not found, return a 404 response
+    //   res.status(NOT_FOUND).send({ message: "Requested clothing item not found" });
+    //   return;
+    // }
   } catch (err) {
     console.error(
       `Error deleteClothingItem ${err.name} with the message ${err.message} has occurred while executing the code`,
@@ -62,10 +83,14 @@ module.exports.deleteClothingItem = async (req, res) => {
 
     if (err.name === "CastError") {
       // Invalid ID provided, return a 400 response
-      res.status(INVALID_DATA).send({ message: "Invalid clothing item ID provided" });
+      res
+        .status(INVALID_DATA)
+        .send({ message: "Invalid clothing item ID provided" });
     } else {
       // Other errors, return a 500 response
-      res.status(SERVER_ERROR).send({ message: "An error has occurred on the server." });
+      res
+        .status(SERVER_ERROR)
+        .send({ message: "An error has occurred on the server." });
     }
   }
 };
@@ -78,22 +103,30 @@ module.exports.likeItem = async (req, res) => {
     const updatedItem = await ClothingItems.findByIdAndUpdate(
       itemId,
       { $addToSet: { likes: userId } },
-      { new: true }
-    );
-
-    res.status(OK).send({ data: updatedItem });
+      { new: true },
+    )
+      .orFail(() => {
+        const error = new Error("Item ID not found");
+        error.statusCode = NOT_FOUND;
+        throw error;
+      })
+      .then((updatedItem) => {
+        res.status(OK).send({ data: updatedItem });
+      });
   } catch (err) {
     console.error(
       `Error likeItem ${err.name} with the message ${err.message} has occurred while executing the code`,
     );
-    if (err.name === 'ValidationError') {
-      res.status(NOT_FOUND).send({ message: "Invalid Data was provided."})
+    if (err.name === "ValidationError") {
+      res.status(NOT_FOUND).send({ message: "Invalid Data was provided." });
       return;
-    } else if (err.name === 'CastError') {
-      res.status(INVALID_DATA).send({ message: "Item cannot be found."})
+    } else if (err.name === "CastError") {
+      res.status(INVALID_DATA).send({ message: "Item cannot be found." });
       return;
     } else {
-      res.status(SERVER_ERROR).send({ message: "An error has occurred on the server." });
+      res
+        .status(SERVER_ERROR)
+        .send({ message: "An error has occurred on the server." });
       return;
     }
   }
@@ -107,25 +140,35 @@ module.exports.dislikeItem = async (req, res) => {
     const updatedItem = await ClothingItems.findByIdAndUpdate(
       itemId,
       { $pull: { likes: userId } },
-      { new: true }
-    );
+      { new: true },
+    )
+      .orFail(() => {
+        const error = new Error("Item ID not found");
+        error.statusCode = 400;
+        throw error;
+      })
+      .then((updatedItem) => {
+        res.status(OK).send({ data: updatedItem });
+      });
 
-    if (!updatedItem) {
-      res.status(NOT_FOUND).send({ message: "Requested clothing item not found" });
-      return;
-    }
-
-    res.status(OK).send({ data: updatedItem });
+    // if (!updatedItem) {
+    //   res.status(NOT_FOUND).send({ message: "Requested clothing item not found" });
+    //   return;
+    // }
   } catch (err) {
     console.error(
       `Error dislikeItem ${err.name} with the message ${err.message} has occurred while executing the code`,
     );
 
-    if (err.name === 'ValidationError' || err.name === 'CastError') {
-      res.status(NOT_FOUND).send({ message: "Invalid Data or Item not found." });
+    if (err.name === "ValidationError" || err.name === "CastError") {
+      res
+        .status(NOT_FOUND)
+        .send({ message: "Invalid Data or Item not found." });
       return;
     } else {
-      res.status(SERVER_ERROR).send({ message: "An error has occurred on the server." });
+      res
+        .status(SERVER_ERROR)
+        .send({ message: "An error has occurred on the server." });
       return;
     }
   }
