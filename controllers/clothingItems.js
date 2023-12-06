@@ -1,5 +1,5 @@
 const ClothingItems = require("../models/clothingItem");
-const { INVALID_DATA, NOT_FOUND, SERVER_ERROR, CREATED } = require("../utils/errors");
+const { INVALID_DATA, NOT_FOUND, SERVER_ERROR, CREATED, OK } = require("../utils/errors");
 
 module.exports.getClothingItems = async (req, res) => {
   try {
@@ -68,7 +68,7 @@ module.exports.likeItem = async (req, res) => {
       { new: true }
     );
 
-    res.send({ data: updatedItem });
+    res.status(OK).send({ data: updatedItem });
   } catch (err) {
     console.error(
       `Error ${err.name} with the message ${err.message} has occurred while executing the code`,
