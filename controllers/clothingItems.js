@@ -108,7 +108,7 @@ module.exports.dislikeItem = async (req, res) => {
       return;
     }
 
-    res.send({ data: updatedItem });
+    res.status(OK).send({ data: updatedItem });
   } catch (err) {
     console.error(
       `Error ${err.name} with the message ${err.message} has occurred while executing the code`,
