@@ -12,9 +12,9 @@ module.exports.getClothingItems = async (req, res) => {
     const items = await ClothingItems.find({});
     res.send({ data: items });
   } catch (err) {
-    // console.error(
-    //   `Error getClothingItems ${err.name} with the message ${err.message} has occurred while executing the code`,
-    // );
+    console.error(
+      `Error getClothingItems ${err} `,
+    );
 
     if (err.name === "CastError") {
       res.status(INVALID_DATA).send({ message: "Invalid user ID provided" });
@@ -39,9 +39,9 @@ module.exports.createClothingItem = async (req, res) => {
     });
     res.status(CREATED).send({ data: item });
   } catch (err) {
-    // console.error(
-    //   `Error ${err.name} with the message ${err.message} has occurred while executing the code`,
-    // );
+    console.error(
+      `Error ${err}`,
+    );
 
     if (err.name === "ValidationError") {
       res.status(INVALID_DATA).send({
@@ -67,20 +67,22 @@ module.exports.deleteClothingItem = async (req, res) => {
 
     res.status(OK).send({ data: item });
   } catch (err) {
-    // console.error(
-    //   `Error deleteClothingItem ${err.name} with the message ${err.message} has occurred while executing the code`,
-    // );
+    console.error(
+      `Error deleteClothingItem ${err}`,
+    );
 
     if (err.name === "CastError") {
       // Invalid ID provided, return a 400 response
       res
         .status(INVALID_DATA)
         .send({ message: "Invalid clothing item ID provided" });
+    } else if (err.name === 'DocumentNotFoundError') {
+      res.status(NOT_FOUND).send({ message: 'ID not found'})
     } else {
       // Other errors, return a 500 response
       res
-        .status(SERVER_ERROR)
-        .send({ message: "An error has occurred on the server." });
+        .status(err.statusCode || SERVER_ERROR)
+        .send({ message: err.message || "An error has occoured on the Server."});
     }
   }
 };
@@ -107,19 +109,19 @@ module.exports.likeItem = async (req, res) => {
 
     res.status(OK).send({ data: updatedItem });
   } catch (err) {
-    console.error(
-      `Error likeItem ${err.name} with the message ${err.message} has occurred while executing the code`,
-    );
-
     if (err.name === "ValidationError") {
       res.status(NOT_FOUND).send({ message: "Invalid Data was provided." });
     } else if (err.name === "CastError") {
       res.status(INVALID_DATA).send({ message: "Item cannot be found." });
+    } else if (err.statusCode= 404) {
+      res.status(NOT_FOUND).send({ message: 'Item ID not found'})
     } else {
       res
-        .status(SERVER_ERROR)
-        .send({ message: "An error has occurred on the server." });
+        .status(err.statusCode || SERVER_ERROR)
+        .send({ message: err.message || "An error has occoured on the Server."});
     }
+    console.error(
+      `Error likeItem ${err} `);
   }
 };
 
@@ -134,15 +136,13 @@ module.exports.dislikeItem = async (req, res) => {
       { new: true },
     ).orFail(() => {
       const error = new Error("Item ID not found");
-      error.statusCode = INVALID_DATA;
+      error.statusCode = NOT_FOUND; // Set the status code to 404
       throw error;
     });
 
     res.status(OK).send({ data: updatedItem });
   } catch (err) {
-    // console.error(
-    //   `Error dislikeItem ${err.name} with the message ${err.message} has occurred while executing the code`,
-    // );
+    console.error(`Error dislikeItem ${err}`);
 
     if (err.name === "ValidationError" || err.name === "CastError") {
       res
@@ -152,8 +152,8 @@ module.exports.dislikeItem = async (req, res) => {
       res.status(NOT_FOUND).send({ message: "Item not found." });
     } else {
       res
-        .status(SERVER_ERROR)
-        .send({ message: "An error has occurred on the server." });
+        .status(err.statusCode || SERVER_ERROR)
+        .send({ message: err.message || "An error has occoured on the Server."});
     }
   }
 };
