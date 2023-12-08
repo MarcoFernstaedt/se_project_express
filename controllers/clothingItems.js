@@ -57,14 +57,14 @@ module.exports.deleteClothingItem = async (req, res) => {
       },
     );
 
-    res.status(OK).send({ data: item });
+    res.send({ data: item });
   } catch (err) {
     if (err.name === "CastError") {
       // Invalid ID provided, return a 400 response
       res
         .status(INVALID_DATA)
         .send({ message: "Invalid clothing item ID provided" });
-    } else if (err.name === 'DocumentNotFoundError') {
+    } else if (err.statusCode === 404) {
       res.status(NOT_FOUND).send({ message: 'ID not found'})
     } else {
       // Other errors, return a 500 response
@@ -132,7 +132,7 @@ module.exports.dislikeItem = async (req, res) => {
       res
         .status(INVALID_DATA)
         .send({ message: "Invalid Data or Item not found." }); // Change status code to 400
-    } else if (err.name === "DocumentNotFoundError") {
+    } else if (err.statusCode === 404) {
       res.status(NOT_FOUND).send({ message: "Item not found." });
     } else {
       res
