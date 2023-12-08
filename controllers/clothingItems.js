@@ -90,11 +90,6 @@ module.exports.likeItem = async (req, res) => {
       throw error;
     });
 
-    // Check if the item exists and was updated
-    if (updatedItem === null) {
-      res.status(NOT_FOUND).send({ message: "invalid id" });
-    }
-
     res.status(OK).send({ data: updatedItem });
   } catch (err) {
     if (err.name === "ValidationError") {
