@@ -1,4 +1,5 @@
 const Users = require("../models/user");
+const bcrypt = require('bcrypt');
 const { NOT_FOUND, SERVER_ERROR, INVALID_DATA } = require("../utils/errors");
 
 const getUsers = async (req, res) => {
@@ -34,9 +35,16 @@ const getUser = async (req, res) => {
 };
 
 const createUser = async (req, res) => {
-  const { name, avatar } = req.body;
+  const { name, avatar, email, password } = req.body;
   try {
-    const user = await Users.create({ name, avatar });
+    const existingUser = await  Users.find({email})
+    if (!existingUser) {
+      return res.status(CONFLICT).send({ message: 'Email is already in use' });
+    };
+
+    const hashedPassword = bcrypt.hash(password, 10);
+
+    const user = await Users.create({ name, avatar, email, hashedPassword });
     res.send({ data: user });
   } catch (err) {
     // console.error(`Error createUser ${err.name} with the message ${err.message} has occurred while executing the code`);
