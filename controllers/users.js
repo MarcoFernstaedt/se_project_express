@@ -46,9 +46,9 @@ module.exports.getUsers = async (req, res) => {
   }
 };
 
-module.exports.getUser = async (req, res) => {
+module.exports.getCurrentUser = async (req, res) => {
   try {
-    const user = await Users.findById(req.params.userId);
+    const user = await Users.findById(req.user._id);
     if (user) {
       res.send({ data: user });
     } else {
