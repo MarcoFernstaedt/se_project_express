@@ -34,7 +34,7 @@ module.exports.login = async (req, res) => {
   }
 };
 
-const getUsers = async (req, res) => {
+module.exports.getUsers = async (req, res) => {
   try {
     const users = await Users.find({});
     res.send({ data: users });
@@ -46,7 +46,7 @@ const getUsers = async (req, res) => {
   }
 };
 
-const getUser = async (req, res) => {
+module.exports.getUser = async (req, res) => {
   try {
     const user = await Users.findById(req.params.userId);
     if (user) {
@@ -66,7 +66,7 @@ const getUser = async (req, res) => {
   }
 };
 
-const createUser = async (req, res) => {
+module.exports.createUser = async (req, res) => {
   const { name, avatar, email, password } = req.body;
   try {
     const existingUser = await Users.find({ email });
@@ -91,5 +91,3 @@ const createUser = async (req, res) => {
     }
   }
 };
-
-module.exports = { getUsers, getUser, createUser };
