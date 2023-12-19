@@ -1,19 +1,25 @@
 const Users = require("../models/user");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const { JWT_SECRET } = require('../utils/config');
+const { JWT_SECRET } = require("../utils/config");
 const {
   NOT_FOUND,
   SERVER_ERROR,
   INVALID_DATA,
   CREATED,
   CONFLICT,
+  UNAUTHORIZED,
 } = require("../utils/errors");
 
 module.exports.login = async (req, res) => {
   const { email, password } = req.body;
   try {
     const user = await Users.findUserByCredentials(email, password);
+    if (!user) {
+      return res
+        .status(UNAUTHORIZED)
+        .send({ message: "Invalid email or password" });
+    }
 
     const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
       expiresIn: "7d",
