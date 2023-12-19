@@ -1,6 +1,31 @@
 const Users = require("../models/user");
-const bcrypt = require('bcrypt');
-const { NOT_FOUND, SERVER_ERROR, INVALID_DATA } = require("../utils/errors");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const {
+  NOT_FOUND,
+  SERVER_ERROR,
+  INVALID_DATA,
+  CREATED,
+} = require("../utils/errors");
+require('dotenv').config();
+
+module.exports.login = async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    const user = await Users.findUserByCredentials(email, password);
+
+    const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "7d",
+    });
+
+    res.status(CREATED).send({ token });
+  } catch (err) {
+    console.log(`Login ${err}`);
+    res
+      .status(err.statusCode || SERVER_ERROR)
+      .send({ message: err.message || "An error has occoured on the Server." });
+  }
+};
 
 const getUsers = async (req, res) => {
   try {
@@ -37,10 +62,10 @@ const getUser = async (req, res) => {
 const createUser = async (req, res) => {
   const { name, avatar, email, password } = req.body;
   try {
-    const existingUser = await  Users.find({email})
+    const existingUser = await Users.find({ email });
     if (!existingUser) {
-      return res.status(CONFLICT).send({ message: 'Email is already in use' });
-    };
+      return res.status(CONFLICT).send({ message: "Email is already in use" });
+    }
 
     const hashedPassword = bcrypt.hash(password, 10);
 
