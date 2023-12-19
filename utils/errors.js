@@ -4,4 +4,5 @@ module.exports = {
   SERVER_ERROR: 500,
   OK: 200,
   CREATED: 201,
+  CONFLICT: 409,
 };

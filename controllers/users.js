@@ -6,6 +6,7 @@ const {
   SERVER_ERROR,
   INVALID_DATA,
   CREATED,
+  CONFLICT,
 } = require("../utils/errors");
 require('dotenv').config();
 
