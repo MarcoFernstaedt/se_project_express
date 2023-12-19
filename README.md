@@ -14,7 +14,9 @@ This project serves as the backend setup for the "WTWR" (What to Wear?) applicat
 - **MongoDB**: A NoSQL database for efficient data storage.
 - **Mongoose**: An ODM library for MongoDB and Node.js.
 - **Validator**: A library for data validation.
-- **CORS**
+- **bcrypt**: A library for hashing passwords.
+- **jsonwebtoken**: Allows use of JWT for authentication.
+- **CORS**:
 
 ## Development Setup
 1. Clone this repository to your local machine.
