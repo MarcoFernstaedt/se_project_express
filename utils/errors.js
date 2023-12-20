@@ -6,4 +6,5 @@ module.exports = {
   CREATED: 201,
   CONFLICT: 409,
   UNAUTHORIZED: 401,
+  FORBIDDEN: 403,
 };

@@ -5,6 +5,7 @@ const {
   SERVER_ERROR,
   CREATED,
   OK,
+  FORBIDDEN,
 } = require("../utils/errors");
 
 module.exports.getClothingItems = async (req, res) => {

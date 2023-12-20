@@ -1,13 +1,13 @@
 const router = require("express").Router();
 // Importing routes
-// const userRoutes = require("./users");
+const { login, createUser } = require("../controllers/users");
 const clothingItemRoutes = require("./clothingItems");
-// Iporting error codes
+// Importing error codes
 const { NOT_FOUND } = require("../utils/errors");
 
 // Routes
-app.post('/signin', login);
-app.post('/signup', createUser);
+router.post('/signin', login);
+router.post('/signup', createUser);
 
 // router.use("/users", userRoutes);
 router.use("/items", clothingItemRoutes);

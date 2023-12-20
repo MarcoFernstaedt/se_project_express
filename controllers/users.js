@@ -1,7 +1,6 @@
-const Users = require("../models/user");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const { JWT_SECRET } = require("../utils/config");
+const Users = require("../models/user");
 const {
   NOT_FOUND,
   SERVER_ERROR,
@@ -25,9 +24,9 @@ module.exports.login = async (req, res) => {
       expiresIn: "7d",
     });
 
-    res.status(CREATED).send({ token });
+    return res.status(CREATED).send({ token, user });
   } catch (err) {
-    console.log(`Login ${err}`);
+    console.log(`error login ${err}`);
     res
       .status(err.statusCode || SERVER_ERROR)
       .send({ message: err.message || "An error has occoured on the Server." });
@@ -74,7 +73,7 @@ module.exports.updateUserProfile = async (req, res) => {
     const allowedUpdates = ["name", "avatar"];
     const updates = Object.keys(req.body);
     const isValidOperation = updates.every((update) =>
-      allowedUpdates.includes(update)
+      allowedUpdates.includes(update),
     );
 
     if (!isValidOperation) {
@@ -103,25 +102,26 @@ module.exports.updateUserProfile = async (req, res) => {
 module.exports.createUser = async (req, res) => {
   const { name, avatar, email, password } = req.body;
   try {
-    const existingUser = await Users.find({ email });
+    const existingUser = await Users.findOne({ email });
     if (!existingUser) {
       return res.status(CONFLICT).send({ message: "Email is already in use" });
     }
 
-    const hashedPassword = bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-    const user = await Users.create({ name, avatar, email, hashedPassword });
-    res.send({ data: user });
+    const user = await Users.create({ name, avatar, email, password: hashedPassword });
+    const { password: hashedPasswordInResponse, ...userWithoutPassword } = user.toObject();
+    res.status(CREATED).send({ data: userWithoutPassword });
   } catch (err) {
-    // console.error(`Error createUser ${err.name} with the message ${err.message} has occurred while executing the code`);
+    console.log(`createUser ${err}`)
     if (err.name === "ValidationError") {
       res
         .status(INVALID_DATA)
         .send({ message: "Invalid data provided for creating a user" });
     } else {
       res
-        .status(SERVER_ERROR)
-        .send({ message: "An error has occurred on the server." });
+        .status(err.statusCode || SERVER_ERROR)
+        .send({ message: err.message || "An error has occurred on the server." });
     }
   }
 };
