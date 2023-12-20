@@ -66,6 +66,40 @@ module.exports.getCurrentUser = async (req, res) => {
   }
 };
 
+// controllers/users.js
+
+module.exports.updateUserProfile = async (req, res) => {
+  try {
+    // Validate the allowed fields for update
+    const allowedUpdates = ["name", "avatar"];
+    const updates = Object.keys(req.body);
+    const isValidOperation = updates.every((update) =>
+      allowedUpdates.includes(update)
+    );
+
+    if (!isValidOperation) {
+      return res
+        .status(INVALID_DATA)
+        .send({ message: "Invalid updates provided" });
+    }
+
+    // Update the user profile
+    updates.forEach((update) => (req.user[update] = req.body[update]));
+    await req.user.save();
+
+    res.send({ data: req.user });
+  } catch (err) {
+    // Handle specific errors
+    if (err.name === "ValidationError") {
+      res.status(INVALID_DATA).send({ message: "Validation error" });
+    } else {
+      res
+        .status(SERVER_ERROR)
+        .send({ message: "An error has occurred on the server." });
+    }
+  }
+};
+
 module.exports.createUser = async (req, res) => {
   const { name, avatar, email, password } = req.body;
   try {
