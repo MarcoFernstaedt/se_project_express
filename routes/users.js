@@ -2,8 +2,8 @@ const router = require("express").Router();
 // importing controllers
 const {
   getCurrentUser,
-  getUsers,
-  createUser,
+  // getUsers,
+  // createUser,
 } = require("../controllers/users");
 // importingg auth middleware
 const { authorizationMiddleware } = require("../middleware/auth");
