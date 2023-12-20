@@ -1,5 +1,6 @@
 const express = require("express");
 const helmet = require("helmet");
+const cors = require("cors");
 // app setup
 const app = express();
 const mongoose = require("mongoose");
@@ -13,6 +14,8 @@ app.use(express.json());
 
 // helmet security
 app.use(helmet());
+
+app.use(cors());
 
 // routes
 app.use("/", routes);
