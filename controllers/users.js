@@ -24,12 +24,20 @@ module.exports.login = async (req, res) => {
       expiresIn: "7d",
     });
 
-    return res.status(CREATED).send({ token, user });
+    // Return only essential user information in the response
+    const responseData = {
+      _id: user._id,
+      name: user.name,
+      avatar: user.avatar,
+      email: user.email,
+    };
+
+    return res.status(OK).send({ token, user: responseData });
   } catch (err) {
     console.log(`error login ${err}`);
     res
       .status(err.statusCode || SERVER_ERROR)
-      .send({ message: err.message || "An error has occoured on the Server." });
+      .send({ message: err.message || "An error has occurred on the Server." });
   }
 };
 
@@ -103,25 +111,33 @@ module.exports.createUser = async (req, res) => {
   const { name, avatar, email, password } = req.body;
   try {
     const existingUser = await Users.findOne({ email });
-    if (!existingUser) {
+    if (existingUser) {
       return res.status(CONFLICT).send({ message: "Email is already in use" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = await Users.create({ name, avatar, email, password: hashedPassword });
-    const { password: hashedPasswordInResponse, ...userWithoutPassword } = user.toObject();
-    res.status(CREATED).send({ data: userWithoutPassword });
+
+    // Exclude the hashed password from the response
+    const responseData = {
+      _id: user._id,
+      name: user.name,
+      avatar: user.avatar,
+      email: user.email,
+    };
+
+    return res.status(CREATED).send({ data: responseData });
   } catch (err) {
-    console.log(`createUser ${err}`)
+    console.log(`createUser ${err}`);
     if (err.name === "ValidationError") {
-      res
+      return res
         .status(INVALID_DATA)
         .send({ message: "Invalid data provided for creating a user" });
-    } else {
-      res
-        .status(err.statusCode || SERVER_ERROR)
-        .send({ message: err.message || "An error has occurred on the server." });
     }
+
+    return res
+      .status(err.statusCode || SERVER_ERROR)
+      .send({ message: err.message || "An error has occurred on the server." });
   }
 };
