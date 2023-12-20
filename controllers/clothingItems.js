@@ -49,28 +49,39 @@ module.exports.createClothingItem = async (req, res) => {
 
 module.exports.deleteClothingItem = async (req, res) => {
   try {
-    const item = await ClothingItems.findByIdAndDelete(req.params.itemId).orFail(
-      () => {
-        const error = new Error("Item ID not found");
-        error.statusCode = NOT_FOUND;
-        throw error;
-      },
-    );
+    // Find the clothing item by ID
+    const item = await ClothingItems.findById(req.params.itemId).orFail(() => {
+      // If the item is not found, create and throw a 404 error
+      const error = new Error("Item ID not found");
+      error.statusCode = NOT_FOUND;
+      throw error;
+    });
 
-    res.send({ data: item });
+    // Check if the logged-in user is the owner of the item
+    if (item.owner.toString() !== req.user._id.toString()) {
+      // If not, return a 403 (Forbidden) error
+      const error = new Error("You do not have permission to delete this item");
+      error.statusCode = FORBIDDEN;
+      throw error;
+    }
+
+    // If the user is the owner, delete the item and send a success response
+    const deletedItem = await item.remove();
+    res.send({ data: deletedItem });
   } catch (err) {
     if (err.name === "CastError") {
-      // Invalid ID provided, return a 400 response
+      // Handle the case where an invalid ID is provided
       res
         .status(INVALID_DATA)
         .send({ message: "Invalid clothing item ID provided" });
-    } else if (err.statusCode === 404) {
-      res.status(NOT_FOUND).send({ message: 'ID not found'})
+    } else if (err.statusCode === NOT_FOUND || err.statusCode === FORBIDDEN) {
+      // Handle 404 or 403 errors
+      res.status(err.statusCode).send({ message: err.message });
     } else {
-      // Other errors, return a 500 response
+      // Handle other errors, return a 500 response
       res
-        .status(err.statusCode || SERVER_ERROR)
-        .send({ message: err.message || "An error has occoured on the Server."});
+        .status(SERVER_ERROR)
+        .send({ message: "An error has occurred on the Server." });
     }
   }
 };
@@ -97,11 +108,13 @@ module.exports.likeItem = async (req, res) => {
     } else if (err.name === "CastError") {
       res.status(INVALID_DATA).send({ message: "Item cannot be found." });
     } else if (err.statusCode === 404) {
-      res.status(NOT_FOUND).send({ message: 'Item ID not found'})
+      res.status(NOT_FOUND).send({ message: "Item ID not found" });
     } else {
       res
         .status(err.statusCode || SERVER_ERROR)
-        .send({ message: err.message || "An error has occoured on the Server."});
+        .send({
+          message: err.message || "An error has occoured on the Server.",
+        });
     }
   }
 };
@@ -132,7 +145,9 @@ module.exports.dislikeItem = async (req, res) => {
     } else {
       res
         .status(err.statusCode || SERVER_ERROR)
-        .send({ message: err.message || "An error has occoured on the Server."});
+        .send({
+          message: err.message || "An error has occoured on the Server.",
+        });
     }
   }
 };
