@@ -1,5 +1,5 @@
-const mongoose = require('mongoose');
-const validator = require('validator');
+const mongoose = require("mongoose");
+const validator = require("validator");
 const ClothingItems = require("../models/clothingItem");
 const {
   INVALID_DATA,
@@ -60,14 +60,13 @@ module.exports.createClothingItem = async (req, res) => {
     return res.status(CREATED).send({ data: item });
   } catch (err) {
     if (err.name === "ValidationError") {
-      res.status(INVALID_DATA).send({
+      return res.status(INVALID_DATA).send({
         message: "Invalid data provided for creating a clothing item",
       });
-    } else {
-      res
-        .status(SERVER_ERROR)
-        .send({ message: "An error has occurred on the server." });
     }
+    return res
+      .status(SERVER_ERROR)
+      .send({ message: "An error has occurred on the server." });
   }
 };
 
@@ -103,9 +102,9 @@ module.exports.deleteClothingItem = async (req, res) => {
       res.status(err.statusCode).send({ message: err.message });
     } else {
       // Handle other errors, return a 500 response
-      res
-        .status(err.statusCode || SERVER_ERROR)
-        .send({ message: err.message || "An error has occurred on the Server." });
+      res.status(err.statusCode || SERVER_ERROR).send({
+        message: err.message || "An error has occurred on the Server.",
+      });
     }
   }
 };
@@ -123,7 +122,7 @@ module.exports.likeItem = async (req, res) => {
     const updatedItem = await ClothingItems.findByIdAndUpdate(
       itemId,
       { $addToSet: { likes: userId } },
-      { new: true }
+      { new: true },
     );
 
     if (!updatedItem) {
@@ -135,16 +134,20 @@ module.exports.likeItem = async (req, res) => {
     return res.status(OK).send({ data: updatedItem });
   } catch (err) {
     if (err.name === "ValidationError") {
-      res.status(INVALID_DATA).send({ message: "Invalid Data was provided." });
-    } else if (err.name === "CastError") {
-      res.status(INVALID_DATA).send({ message: "Item cannot be found." });
-    } else if (err.statusCode === NOT_FOUND) {
-      res.status(NOT_FOUND).send({ message: "Item not found" });
-    } else {
-      res.status(err.statusCode || SERVER_ERROR).send({
+      return res
+        .status(INVALID_DATA)
+        .send({ message: "Invalid Data was provided." });
+    } if (err.name === "CastError") {
+      return res
+        .status(INVALID_DATA)
+        .send({ message: "Item cannot be found." });
+    } if (err.statusCode === NOT_FOUND) {
+      return res.status(NOT_FOUND).send({ message: "Item not found" });
+    } 
+      return res.status(err.statusCode || SERVER_ERROR).send({
         message: err.message || "An error has occurred on the Server.",
       });
-    }
+    
   }
 };
 
@@ -171,20 +174,18 @@ module.exports.dislikeItem = async (req, res) => {
     return res.status(OK).send({ data: updatedItem });
   } catch (err) {
     if (err.name === "ValidationError" || err.name === "CastError") {
-      res
+      return res
         .status(INVALID_DATA)
         .send({ message: "Invalid Data or Item not found." });
-    } else if (err.statusCode === NOT_FOUND) {
-      res.status(NOT_FOUND).send({
+    } if (err.statusCode === NOT_FOUND) {
+      return res.status(NOT_FOUND).send({
         message: "Item not found.",
         statusCode: NOT_FOUND,
       });
-    } else {
-      res
-        .status(err.statusCode || SERVER_ERROR)
-        .send({
-          message: err.message || "An error has occurred on the Server.",
-        });
-    }
+    } 
+      return res.status(err.statusCode || SERVER_ERROR).send({
+        message: err.message || "An error has occurred on the Server.",
+      });
+    
   }
 };

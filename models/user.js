@@ -57,10 +57,12 @@ userSchema.statics.findUserByCredentials = function findUserByCredentials(
         return user;
       });
     })
-    .catch((err) => Promise.reject({
-        message: "Incorrect email or password",
-        statusCode: UNAUTHORIZED,
-      }));
+    .catch(() => {
+      // Reject the promise with an Error object
+      const error = new Error("Incorrect email or password");
+      error.statusCode = UNAUTHORIZED;
+      throw error;
+    });
 };
 
 module.exports = mongoose.model("user", userSchema);

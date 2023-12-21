@@ -15,9 +15,9 @@ module.exports.authorizationMiddleware = (req, res, next) => {
 
     req.user = payload;
 
-    next();
+    return next();
   } catch (err) {
-    res
+    return res
       .status(err.statusCode || SERVER_ERROR)
       .send({ message: err.message || "Internal sever error" });
   }

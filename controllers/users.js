@@ -93,12 +93,14 @@ module.exports.updateUserProfile = async (req, res) => {
     const updates = Object.keys(req.body);
 
     // Check if the provided values are random
-    const isRandomValues = Object.values(req.body).some(value => value.startsWith("{{$"));
+    const isRandomValues = Object.values(req.body).some((value) =>
+      value.startsWith("{{$"),
+    );
 
     // If random values are provided, skip the validation
-    const isValidOperation = isRandomValues || updates.every((update) =>
-      allowedUpdates.includes(update),
-    );
+    const isValidOperation =
+      isRandomValues ||
+      updates.every((update) => allowedUpdates.includes(update));
 
     if (!isValidOperation) {
       return res
@@ -107,7 +109,9 @@ module.exports.updateUserProfile = async (req, res) => {
     }
 
     // Update the user profile
-    updates.forEach((update) => (req.user[update] = req.body[update]));
+    updates.forEach((update) => {
+      req.user[update] = req.body[update];
+    });
 
     // Respond with the updated user profile
     const responseData = {
@@ -121,11 +125,10 @@ module.exports.updateUserProfile = async (req, res) => {
   } catch (err) {
     // Handle specific errors
     if (err.name === "ValidationError") {
-      res.status(INVALID_DATA).send({ message: "Validation error" });
-    } else {
-      res
-        .status(SERVER_ERROR)
-        .send({ message: "An error has occurred on the server." });
+      return res.status(INVALID_DATA).send({ message: "Validation error" });
     }
+    return res
+      .status(SERVER_ERROR)
+      .send({ message: "An error has occurred on the server." });
   }
 };
