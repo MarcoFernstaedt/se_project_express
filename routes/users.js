@@ -10,7 +10,7 @@ const {
 const { authorizationMiddleware } = require("../middleware/auth");
 
 // routes
-router.get("/users/me", authorizationMiddleware, getCurrentUser);
-router.patch("/users/me", authorizationMiddleware, updateUserProfile);
+router.get("/me", authorizationMiddleware, getCurrentUser);
+router.patch("/me", authorizationMiddleware, updateUserProfile);
 
 module.exports = router;

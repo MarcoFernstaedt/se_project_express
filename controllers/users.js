@@ -149,7 +149,7 @@ module.exports.updateUserProfile = async (req, res) => {
 
     // Update the user profile
     updates.forEach((update) => (req.user[update] = req.body[update]));
-    await req.user.save();
+    // await req.user.save();
 
     // Respond with the updated user profile
     const responseData = {

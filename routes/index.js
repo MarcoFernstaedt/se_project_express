@@ -1,15 +1,16 @@
 const router = require("express").Router();
 // Importing routes
 const { login, createUser } = require("../controllers/users");
+const userRoutes = require("./users");
 const clothingItemRoutes = require("./clothingItems");
 // Importing error codes
 const { NOT_FOUND } = require("../utils/errors");
 
 // Routes
-router.post('/signin', login);
-router.post('/signup', createUser);
+router.post("/signin", login);
+router.post("/signup", createUser);
 
-// router.use("/users", userRoutes);
+router.use("/users", userRoutes);
 router.use("/items", clothingItemRoutes);
 
 // Catch-all non-existant routes.
