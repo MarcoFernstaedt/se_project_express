@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const { UNAUTHORIZED, SERVER_ERROR } = require("../utils/errors");
+const { UNAUTHORIZED } = require("../utils/errors");
 const { JWT_SECRET } = require("../utils/config");
 
 module.exports.authorizationMiddleware = (req, res, next) => {
@@ -18,7 +18,7 @@ module.exports.authorizationMiddleware = (req, res, next) => {
     return next();
   } catch (err) {
     return res
-      .status(err.statusCode || SERVER_ERROR)
+      .status(UNAUTHORIZED)
       .send({ message: err.message || "Internal sever error" });
   }
 };
