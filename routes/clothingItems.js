@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const { authorizationMiddleware } = require("../middleware/auth");
+const { authorizationMiddleware } = require("../middlewares/auth");
 const {
   getClothingItems,
   createClothingItem,

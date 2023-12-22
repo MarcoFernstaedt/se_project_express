@@ -7,7 +7,7 @@ const {
   // createUser,
 } = require("../controllers/users");
 // importingg auth middleware
-const { authorizationMiddleware } = require("../middleware/auth");
+const { authorizationMiddleware } = require("../middlewares/auth");
 
 // routes
 router.get("/me", authorizationMiddleware, getCurrentUser);
