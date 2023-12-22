@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
 const { JWT_SECRET } = require("../utils/config");
 const Users = require("../models/user");
 const {
@@ -7,6 +8,8 @@ const {
   UNAUTHORIZED,
   OK,
   SERVER_ERROR,
+  CONFLICT,
+  CREATED,
 } = require("../utils/errors");
 
 module.exports.login = async (req, res) => {
@@ -108,6 +111,25 @@ module.exports.updateUserProfile = async (req, res) => {
         .send({ message: "Invalid updates provided" });
     }
 
+    // Validate the content of updates
+    const isInvalidContent = updates.some((update) => {
+      if (update === "name" && typeof req.body[update] !== "string") {
+        return true; // Invalid name
+      }
+      if (update === "avatar" && typeof req.body[update] !== "string") {
+        return true; // Invalid avatar
+      }
+      // Add more content validation as needed
+
+      return false;
+    });
+
+    if (isInvalidContent) {
+      return res
+        .status(INVALID_DATA)
+        .send({ message: "Invalid content in updates" });
+    }
+
     // Update the user profile
     updates.forEach((update) => {
       req.user[update] = req.body[update];
@@ -136,10 +158,10 @@ module.exports.updateUserProfile = async (req, res) => {
 module.exports.createUser = async (req, res) => {
   const { name, avatar, email, password } = req.body;
   try {
-    const existingUser = await Users.findOne({ email });
-    if (existingUser) {
-      return res.status(CONFLICT).send({ message: "Email is already in use" });
-    }
+    // const existingUser = await Users.findOne({ email });
+    // if (existingUser) {
+    //   return res.status(CONFLICT).send({ message: "Email is already in use" });
+    // }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -160,9 +182,6 @@ module.exports.createUser = async (req, res) => {
 
     return res.status(CREATED).send({ data: responseData });
   } catch (err) {
-    console.log(
-      `createUser ${err} message: ${err.message} status: ${err.statusCode}`,
-    );
     if (err.name === "ValidationError") {
       return res
         .status(INVALID_DATA)
