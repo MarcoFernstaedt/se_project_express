@@ -91,59 +91,10 @@ module.exports.getCurrentUser = async (req, res) => {
 
 module.exports.updateUserProfile = async (req, res) => {
   try {
-    // Validate the allowed fields for update
-    const allowedUpdates = ["name", "avatar"];
-    const updates = Object.keys(req.body);
+    const { name, avatar } = req.body;
+    const responseData = Users.findByIdAndUpdate(req.body._id, { name, avatar}, {new: true, runValidators: true})
 
-    // Check if the provided values are random
-    const isRandomValues = Object.values(req.body).some((value) =>
-      value.startsWith("{{$"),
-    );
-
-    // If random values are provided, skip the validation
-    const isValidOperation =
-      isRandomValues ||
-      updates.every((update) => allowedUpdates.includes(update));
-
-    if (!isValidOperation) {
-      return res
-        .status(INVALID_DATA)
-        .send({ message: "Invalid updates provided" });
-    }
-
-    // Validate the content of updates
-    const isInvalidContent = updates.some((update) => {
-      if (update === "name" && typeof req.body[update] !== "string") {
-        return true; // Invalid name
-      }
-      if (update === "avatar" && typeof req.body[update] !== "string") {
-        return true; // Invalid avatar
-      }
-      // Add more content validation as needed
-
-      return false;
-    });
-
-    if (isInvalidContent) {
-      return res
-        .status(INVALID_DATA)
-        .send({ message: "Invalid content in updates" });
-    }
-
-    // Update the user profile
-    updates.forEach((update) => {
-      req.user[update] = req.body[update];
-    });
-
-    // Respond with the updated user profile
-    const responseData = {
-      _id: req.user._id,
-      name: req.user.name,
-      avatar: req.user.avatar,
-      email: req.user.email,
-    };
-
-    return res.status(200).send({ data: responseData });
+    return res.status(OK).send({ data: responseData });
   } catch (err) {
     // Handle specific errors
     if (err.name === "ValidationError") {
@@ -158,10 +109,10 @@ module.exports.updateUserProfile = async (req, res) => {
 module.exports.createUser = async (req, res) => {
   const { name, avatar, email, password } = req.body;
   try {
-    // const existingUser = await Users.findOne({ email });
-    // if (existingUser) {
-    //   return res.status(CONFLICT).send({ message: "Email is already in use" });
-    // }
+    const existingUser = await Users.findOne({ email });
+    if (existingUser) {
+      return res.status(CONFLICT).send({ message: "Email is already in use" });
+    }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
