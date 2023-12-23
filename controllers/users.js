@@ -94,7 +94,12 @@ module.exports.updateUserProfile = async (req, res) => {
     const { name, avatar } = req.body;
     const responseData = await Users.findByIdAndUpdate(req.body._id, { name, avatar}, {new: true, runValidators: true})
 
-    return res.status(OK).send({ data: responseData });
+    return res.status(OK).send({ data: {
+      name: responseData.name,
+      avatar: responseData.avatar,
+      email: responseData.email,
+      password: responseData.password
+    } });
   } catch (err) {
     // Handle specific errors
     if (err.name === "ValidationError") {
