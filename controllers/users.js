@@ -92,7 +92,7 @@ module.exports.getCurrentUser = async (req, res) => {
 module.exports.updateUserProfile = async (req, res) => {
   try {
     const { name, avatar } = req.body;
-    const responseData = Users.findByIdAndUpdate(req.body._id, { name, avatar}, {new: true, runValidators: true})
+    const responseData = await Users.findByIdAndUpdate(req.body._id, { name, avatar}, {new: true, runValidators: true})
 
     return res.status(OK).send({ data: responseData });
   } catch (err) {
