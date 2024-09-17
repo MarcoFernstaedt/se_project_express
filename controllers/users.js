@@ -2,33 +2,31 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const { JWT_SECRET } = require("../utils/config");
 const Users = require("../models/user");
-const {
-  NOT_FOUND,
-  INVALID_DATA,
-  UNAUTHORIZED,
-  OK,
-  SERVER_ERROR,
-  CONFLICT,
-  CREATED,
-} = require("../utils/errors");
+const { BadRequestError } = require("../errors/bad-request");
+const { UnAuthorizedError } = require("../errors/unauthorized");
+const { NotFoundError } = require("../errors/not-found");
+const { ConflictError } = require("../errors/conflict");
+const { OK, CREATED } = require("../utils/errors");
 
-module.exports.login = async (req, res) => {
+module.exports.login = async (req, res, next) => {
   const { email, password } = req.body;
 
   try {
     // Check if email and password are provided
     if (!email || !password) {
-      return res
-        .status(INVALID_DATA)
-        .send({ message: "Email and password are required" });
+      throw BadRequestError("Email and passwrod are reuired");
+      // return res
+      //   .status(INVALID_DATA)
+      //   .send({ message: "Email and password are required" });
     }
 
     const user = await Users.findUserByCredentials(email, password);
 
     if (!user) {
-      return res
-        .status(UNAUTHORIZED)
-        .send({ message: "Invalid email or password" });
+      throw UnAuthorizedError("Invalid email or password");
+      // return res
+      //   .status(UNAUTHORIZED)
+      //   .send({ message: "Invalid email or password" });
     }
 
     const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
@@ -45,78 +43,62 @@ module.exports.login = async (req, res) => {
 
     return res.status(OK).send({ token, user: responseData });
   } catch (err) {
-    // Add specific handling for 401 status code
-    if (err.statusCode === 401) {
-      return res
-        .status(UNAUTHORIZED)
-        .send({ message: "Invalid email or password." });
-    }
-
-    // General error handling
-    return res
-      .status(err.statusCode || SERVER_ERROR)
-      .send({ message: err.message || "An error has occurred on the Server." });
+    return next(err);
   }
 };
 
-module.exports.getUsers = async (req, res) => {
+module.exports.getUsers = async (req, res, next) => {
   try {
     const users = await Users.find({});
     res.send({ data: users });
   } catch (err) {
-    res
-      .status(SERVER_ERROR)
-      .send({ message: "An error has occurred on the server." });
+    next(err);
   }
 };
 
-module.exports.getCurrentUser = async (req, res) => {
+module.exports.getCurrentUser = async (req, res, next) => {
   try {
     const user = await Users.findById(req.user._id);
     if (user) {
       res.send({ data: user });
     } else {
-      res.status(NOT_FOUND).send({ message: "User not found" });
+      throw NotFoundError("User not found");
+      // res.status(NOT_FOUND).send({ message: "User not found" });
     }
   } catch (err) {
-    if (err.name === "CastError") {
-      res.status(INVALID_DATA).send({ message: "Invalid user ID provided" });
-    } else {
-      res
-        .status(SERVER_ERROR)
-        .send({ message: "An error has occurred on the server." });
-    }
+    next(err);
   }
 };
 
-module.exports.updateUserProfile = async (req, res) => {
+module.exports.updateUserProfile = async (req, res, next) => {
   try {
     const { name, avatar } = req.body;
-    const responseData = await Users.findByIdAndUpdate(req.user._id, { name, avatar}, {new: true, runValidators: true})
+    const responseData = await Users.findByIdAndUpdate(
+      req.user._id,
+      { name, avatar },
+      { new: true, runValidators: true },
+    );
 
-    return res.status(OK).send({ data: {
-      name: responseData.name,
-      avatar: responseData.avatar,
-      email: responseData.email,
-      password: responseData.password
-    } });
+    return res.status(OK).send({
+      data: {
+        name: responseData.name,
+        avatar: responseData.avatar,
+        email: responseData.email,
+        password: responseData.password,
+      },
+    });
   } catch (err) {
-    // Handle specific errors
-    if (err.name === "ValidationError") {
-      return res.status(INVALID_DATA).send({ message: "Validation error" });
-    }
-    return res
-      .status(SERVER_ERROR)
-      .send({ message: "An error has occurred on the server." });
+    return next(err);
   }
 };
 
-module.exports.createUser = async (req, res) => {
+module.exports.createUser = async (req, res, next) => {
   const { name, avatar, email, password } = req.body;
   try {
     const existingUser = await Users.findOne({ email });
     if (existingUser) {
-      return res.status(CONFLICT).send({ message: "Email is already in use" });
+      throw ConflictError("Email is already in use");
+      // return res.status(CONFLICT).send({ message: "Email is already in use" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -138,19 +120,6 @@ module.exports.createUser = async (req, res) => {
 
     return res.status(CREATED).send({ data: responseData });
   } catch (err) {
-    if (err.name === "ValidationError") {
-      return res
-        .status(INVALID_DATA)
-        .send({ message: "Invalid data provided for creating a user" });
-    }
-
-    // Add specific handling for 409 status code
-    if (err.code === 11000 && err.keyPattern && err.keyPattern.email) {
-      return res.status(CONFLICT).send({ message: "Email is already in use" });
-    }
-
-    return res
-      .status(err.statusCode || SERVER_ERROR)
-      .send({ message: err.message || "An error has occurred on the server." });
+    return next(err);
   }
 };
