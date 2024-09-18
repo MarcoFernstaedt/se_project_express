@@ -2,7 +2,9 @@ const express = require("express");
 const helmet = require("helmet");
 const cors = require("cors");
 // input validation
-const { errors } = require("celebrate")
+const { errors } = require("celebrate");
+// loggers
+const { requestLogger, errorLogger } = require("./middlewares/logger");
 // app setup
 const app = express();
 const mongoose = require("mongoose");
@@ -21,8 +23,14 @@ app.use(helmet());
 // cors to secure api request
 app.use(cors());
 
+// request logs
+app.use(requestLogger);
+
 // routes
 app.use("/", routes);
+
+// error logger
+app.use(errorLogger);
 
 // celebrate error handler
 app.use(errors());
