@@ -1,6 +1,8 @@
 const express = require("express");
 const helmet = require("helmet");
 const cors = require("cors");
+// input validation
+const { errors } = require("celebrate")
 // app setup
 const app = express();
 const mongoose = require("mongoose");
@@ -21,6 +23,9 @@ app.use(cors());
 
 // routes
 app.use("/", routes);
+
+// celebrate error handler
+app.use(errors());
 
 // set port
 const { PORT = 3001 } = process.env;
