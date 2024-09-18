@@ -16,3 +16,6 @@ node_modules
 
 # Enviorment Variables
 .env
+
+# logs
+*.log
