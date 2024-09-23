@@ -1,6 +1,6 @@
 const router = require("express").Router();
 const { authorizationMiddleware } = require("../middlewares/auth");
-const { validateId } = require("../middlewares/validation");
+const { validateCardBody, validateId } = require("../middlewares/validation");
 const {
   getClothingItems,
   createClothingItem,
@@ -10,7 +10,7 @@ const {
 } = require("../controllers/clothingItems");
 
 router.get("/", getClothingItems);
-router.post("/", authorizationMiddleware, createClothingItem);
+router.post("/", validateCardBody, authorizationMiddleware, createClothingItem);
 router.delete(
   "/:itemId",
   validateId,
