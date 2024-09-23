@@ -1,14 +1,16 @@
 const express = require("express");
 const helmet = require("helmet");
 const cors = require("cors");
-// input validation
-const { errors } = require("celebrate");
-// loggers
-const { requestLogger, errorLogger } = require("./middlewares/logger");
 // app setup
 const app = express();
+// database setup
 const mongoose = require("mongoose");
+// input validation
+const { errors } = require("celebrate");
+// routes setup
 const routes = require("./routes");
+// loggers
+const { requestLogger, errorLogger } = require("./middlewares/logger");
 // Centralized Error Handling
 const errorHandlingMiddleWare = require("./middlewares/error");
 
