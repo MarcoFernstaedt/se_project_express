@@ -66,5 +66,5 @@ module.exports.validateId = celebrate({
       "string.hex": "The ID must be a valid hexadecimal value",
       "string.empty": "The ID is required",
     }),
-  }),
+  }).unknown(true),
 });
