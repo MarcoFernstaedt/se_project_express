@@ -10,6 +10,12 @@ const clothingItemRoutes = require("./clothingItems");
 // Importing error codes
 const { NOT_FOUND } = require("../utils/errors");
 
+router.get('/crash-test', () => {
+  setTimeout(() => {
+    throw new Error('Server will crash now');
+  }, 0);
+});
+
 // Routes
 router.post("/signin", validateLoginBody, login);
 router.post("/signup", validateUserBody, createUser);
