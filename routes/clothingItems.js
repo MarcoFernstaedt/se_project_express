@@ -13,15 +13,15 @@ router.get("/", getClothingItems);
 router.post("/", validateCardBody, authorizationMiddleware, createClothingItem);
 router.delete(
   "/:itemId",
-  validateId,
   authorizationMiddleware,
+  validateId,
   deleteClothingItem,
 );
 router.put("/:itemId/likes", validateId, authorizationMiddleware, likeItem);
 router.delete(
   "/:itemId/likes",
-  validateId,
   authorizationMiddleware,
+  validateId,
   dislikeItem,
 );
 
