@@ -9,10 +9,11 @@ const userRoutes = require("./users");
 const clothingItemRoutes = require("./clothingItems");
 // Importing error codes
 const { NOT_FOUND } = require("../utils/errors");
+const NotFoundError = require("../errors/not-found");
 
-router.get('/crash-test', () => {
+router.get("/crash-test", () => {
   setTimeout(() => {
-    throw new Error('Server will crash now');
+    throw new Error("Server will crash now");
   }, 0);
 });
 
@@ -26,6 +27,7 @@ router.use("/items", clothingItemRoutes);
 // Catch-all non-existant routes.
 router.use("*", (req, res) => {
   res.status(NOT_FOUND).json({ message: "Requested resource not found" });
+  throw new NotFoundError("Requested resource not found");
 });
 
 module.exports = router;
