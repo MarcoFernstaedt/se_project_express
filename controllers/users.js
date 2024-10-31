@@ -2,11 +2,11 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const { JWT_SECRET } = require("../utils/config");
 const Users = require("../models/user");
-const { BadRequestError } = require("../errors/bad-request");
-const { UnAuthorizedError } = require("../errors/unauthorized");
-const { NotFoundError } = require("../errors/not-found");
-const { ConflictError } = require("../errors/conflict");
-const { OK, CREATED } = require("../utils/errors");
+const BadRequestError = require("../errors/bad-request");
+const UnAuthorizedError = require("../errors/unauthorized");
+const NotFoundError = require("../errors/not-found");
+const ConflictError = require("../errors/conflict");
+const { OK, CREATED, INVALID_DATA } = require("../utils/errors");
 
 module.exports.login = async (req, res, next) => {
   const { email, password } = req.body;
@@ -14,7 +14,7 @@ module.exports.login = async (req, res, next) => {
   try {
     // Check if email and password are provided
     if (!email || !password) {
-      throw BadRequestError("Email and passwrod are reuired");
+      throw new BadRequestError("Email and passwrod are reuired");
       // return res
       //   .status(INVALID_DATA)
       //   .send({ message: "Email and password are required" });
@@ -47,22 +47,13 @@ module.exports.login = async (req, res, next) => {
   }
 };
 
-module.exports.getUsers = async (req, res, next) => {
-  try {
-    const users = await Users.find({});
-    res.send({ data: users });
-  } catch (err) {
-    next(err);
-  }
-};
-
 module.exports.getCurrentUser = async (req, res, next) => {
   try {
     const user = await Users.findById(req.user._id);
     if (user) {
       res.send({ data: user });
     } else {
-      throw NotFoundError("User not found");
+      throw new NotFoundError("User not found");
       // res.status(NOT_FOUND).send({ message: "User not found" });
     }
   } catch (err) {
@@ -84,10 +75,12 @@ module.exports.updateUserProfile = async (req, res, next) => {
         name: responseData.name,
         avatar: responseData.avatar,
         email: responseData.email,
-        password: responseData.password,
       },
     });
   } catch (err) {
+    if (err.name === 'ValidationError') {
+      return res.status(INVALID_DATA).send({ message: "Invalid data provided" });
+    }
     return next(err);
   }
 };
@@ -97,7 +90,7 @@ module.exports.createUser = async (req, res, next) => {
   try {
     const existingUser = await Users.findOne({ email });
     if (existingUser) {
-      throw ConflictError("Email is already in use");
+      throw new ConflictError("Email is already in use");
       // return res.status(CONFLICT).send({ message: "Email is already in use" });
     }
 
@@ -120,6 +113,9 @@ module.exports.createUser = async (req, res, next) => {
 
     return res.status(CREATED).send({ data: responseData });
   } catch (err) {
+    if (err.name === 'ValidationError') {
+      return res.status(INVALID_DATA).send({ message: "Invalid data provided" });
+    }
     return next(err);
   }
 };
