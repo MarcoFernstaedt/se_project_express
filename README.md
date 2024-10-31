@@ -3,6 +3,10 @@
 ## Overview
 This project serves as the backend setup for the "WTWR" (What to Wear?) application. The primary goal is to establish a server using Express, connect it to a MongoDB database, and configure routes and controllers for handling API functionality. Additionally, this project focuses on incorporating security measures using the Helmet middleware and follows best practices for coding and linting.
 
+##Live Site##
+- **Front-End: https://www.wtwrweatherapp.twilightparadox.com
+- **Back-End: https://api.wtwrweatherapp.twilightparadox.com
+
 ## Scripts
 - **Start Server**: `npm start` (Runs the server using `node app.js`).
 - **Development Mode**: `npm run dev` (Runs the server in development mode using `nodemon`).
