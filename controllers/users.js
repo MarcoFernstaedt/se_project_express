@@ -78,8 +78,10 @@ module.exports.updateUserProfile = async (req, res, next) => {
       },
     });
   } catch (err) {
-    if (err.name === 'ValidationError') {
-      return res.status(INVALID_DATA).send({ message: "Invalid data provided" });
+    if (err.name === "ValidationError") {
+      return res
+        .status(INVALID_DATA)
+        .send({ message: "Invalid data provided" });
     }
     return next(err);
   }
@@ -113,8 +115,10 @@ module.exports.createUser = async (req, res, next) => {
 
     return res.status(CREATED).send({ data: responseData });
   } catch (err) {
-    if (err.name === 'ValidationError') {
-      return res.status(INVALID_DATA).send({ message: "Invalid data provided" });
+    if (err.name === "ValidationError") {
+      return res
+        .status(INVALID_DATA)
+        .send({ message: "Invalid data provided" });
     }
     return next(err);
   }
