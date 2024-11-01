@@ -1,11 +1,11 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
 const ClothingItems = require("../models/clothingItem");
-const { BadRequestError } = require("../errors/bad-request");
-const { UnAuthorizedError } = require("../errors/unauthorized");
-const { NotFoundError } = require("../errors/not-found");
-const { ConflictError } = require("../errors/conflict");
-const { ForbiddenError } = require("../errors/forbidden");
+const BadRequestError = require("../errors/bad-request");
+const UnAuthorizedError = require("../errors/unauthorized");
+const NotFoundError = require("../errors/not-found");
+const ConflictError = require("../errors/conflict");
+const ForbiddenError = require("../errors/forbidden");
 const {
   INVALID_DATA,
   NOT_FOUND,
@@ -30,26 +30,19 @@ module.exports.createClothingItem = async (req, res, next) => {
     const userId = req.user._id;
 
     if (!name || !weather || !imageUrl) {
-      throw BadRequestError("Name, Weather and ImageUrl are required fields");
-      // return res.status(INVALID_DATA).send({
-      //   message: "Name, weather, and imageUrl are required fields",
-      // });
+      throw new BadRequestError(
+        "Name, Weather and ImageUrl are required fields",
+      );
     }
 
     // Check if imageUrl is a valid URL
     if (!validator.isURL(imageUrl)) {
-      throw BadRequestError("Invalid imageUrl format");
-      // return res.status(INVALID_DATA).send({
-      //   message: "Invalid imageUrl format",
-      // });
+      throw new BadRequestError("Invalid imageUrl format");
     }
 
     // Check if the name meets the minimum length requirement
     if (name.length < 2 || name.length > 30) {
-      throw BadRequestError("Name must be at least 2 characters long");
-      // return res.status(INVALID_DATA).send({
-      //   message: "Name must be at least 2 characters long",
-      // });
+      throw new BadRequestError("Name must be at least 2 characters long");
     }
 
     const item = await ClothingItems.create({
@@ -70,16 +63,15 @@ module.exports.deleteClothingItem = async (req, res, next) => {
     // Find the clothing item by ID
     const item = await ClothingItems.findById(req.params.itemId).orFail(() => {
       // If the item is not found, create and throw a 404 error
-      throw NotFoundError;
+      throw new NotFoundError();
     });
 
     // Check if the logged-in user is the owner of the item
     if (item.owner.toString() !== req.user._id.toString()) {
       // If not, return a 403 (Forbidden) error
-      throw ForbiddenError("You do not have permission to delete this item");
-      // const error = new Error("You do not have permission to delete this item");
-      // error.statusCode = FORBIDDEN;
-      // throw error;
+      throw new ForbiddenError(
+        "You do not have permission to delete this item",
+      );
     }
 
     // If the user is the owner, delete the item and send a success response
@@ -97,7 +89,7 @@ module.exports.likeItem = async (req, res, next) => {
 
     // Check if itemId is a valid ObjectId
     if (!mongoose.Types.ObjectId.isValid(itemId)) {
-      throw BadRequestError("Invalid Item ID");
+      throw new BadRequestError("Invalid Item ID");
       // return res.status(INVALID_DATA).send({ message: "Invalid Item ID" });
     }
 
@@ -108,10 +100,7 @@ module.exports.likeItem = async (req, res, next) => {
     );
 
     if (!updatedItem) {
-      throw NotFoundError("Item not found");
-      // const err = new Error("Item not found");
-      // err.statusCode = NOT_FOUND;
-      // throw err;
+      throw new NotFoundError("Item not found");
     }
 
     return res.status(OK).send({ data: updatedItem });
@@ -127,8 +116,7 @@ module.exports.dislikeItem = async (req, res, next) => {
 
     // Check if itemId is a valid ObjectId
     if (!mongoose.Types.ObjectId.isValid(itemId)) {
-      throw BadRequestError("Invalid Item ID");
-      // return res.status(INVALID_DATA).send({ message: "Invalid Item ID" });
+      throw new BadRequestError("Invalid Item ID");
     }
 
     const updatedItem = await ClothingItems.findByIdAndUpdate(
@@ -136,10 +124,7 @@ module.exports.dislikeItem = async (req, res, next) => {
       { $pull: { likes: userId } },
       { new: true },
     ).orFail(() => {
-      throw NotFoundError("Item ID not found");
-      // const error = new Error("Item ID not found");
-      // error.statusCode = NOT_FOUND;
-      // throw error;
+      throw new NotFoundError("Item ID not found");
     });
 
     return res.status(OK).send({ data: updatedItem });
