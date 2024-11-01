@@ -26,7 +26,6 @@ router.use("/items", clothingItemRoutes);
 
 // Catch-all non-existant routes.
 router.use("*", (req, res) => {
-  res.status(NOT_FOUND).json({ message: "Requested resource not found" });
   throw new NotFoundError("Requested resource not found");
 });
 
