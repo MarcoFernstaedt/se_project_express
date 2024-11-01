@@ -7,9 +7,6 @@ module.exports.authorizationMiddleware = (req, res, next) => {
   const token = req.headers.authorization?.replace("Bearer ", "");
   if (!token) {
     return new UNAUTHORIZED("Unauthorized - Missing Token");
-    // res
-    //   .status(UNAUTHORIZED)
-    //   .json({ message:  });
   }
 
   try {
@@ -19,9 +16,6 @@ module.exports.authorizationMiddleware = (req, res, next) => {
 
     return next();
   } catch (err) {
-    return new UNAUTHORIZED(err.message || "Internal sever error");
-    // res
-    //   .status(UNAUTHORIZED)
-    //   .send({ message:  });
+    return new UNAUTHORIZED("Unauthorized - Invalid Token");
   }
 };
