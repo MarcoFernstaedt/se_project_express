@@ -8,9 +8,15 @@ const {
 } = require("../controllers/users");
 // importingg auth middleware
 const { authorizationMiddleware } = require("../middlewares/auth");
+const validateUpdateUserData = require("../middlewares/validation");
 
 // routes
 router.get("/me", authorizationMiddleware, getCurrentUser);
-router.patch("/me", authorizationMiddleware, updateUserProfile);
+router.patch(
+  "/me",
+  authorizationMiddleware,
+  validateUpdateUserData,
+  updateUserProfile,
+);
 
 module.exports = router;
