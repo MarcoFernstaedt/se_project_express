@@ -15,18 +15,12 @@ module.exports.login = async (req, res, next) => {
     // Check if email and password are provided
     if (!email || !password) {
       throw new BadRequestError("Email and passwrod are reuired");
-      // return res
-      //   .status(INVALID_DATA)
-      //   .send({ message: "Email and password are required" });
     }
 
     const user = await Users.findUserByCredentials(email, password);
 
     if (!user) {
-      throw UnAuthorizedError("Invalid email or password");
-      // return res
-      //   .status(UNAUTHORIZED)
-      //   .send({ message: "Invalid email or password" });
+      throw new UnAuthorizedError("Invalid email or password");
     }
 
     const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
@@ -54,7 +48,6 @@ module.exports.getCurrentUser = async (req, res, next) => {
       res.send({ data: user });
     } else {
       throw new NotFoundError("User not found");
-      // res.status(NOT_FOUND).send({ message: "User not found" });
     }
   } catch (err) {
     next(err);
@@ -79,9 +72,7 @@ module.exports.updateUserProfile = async (req, res, next) => {
     });
   } catch (err) {
     if (err.name === "ValidationError") {
-      return res
-        .status(INVALID_DATA)
-        .send({ message: "Invalid data provided" });
+      throw new BadRequestError("Invalid data provided");
     }
     return next(err);
   }
@@ -93,7 +84,6 @@ module.exports.createUser = async (req, res, next) => {
     const existingUser = await Users.findOne({ email });
     if (existingUser) {
       throw new ConflictError("Email is already in use");
-      // return res.status(CONFLICT).send({ message: "Email is already in use" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -116,9 +106,7 @@ module.exports.createUser = async (req, res, next) => {
     return res.status(CREATED).send({ data: responseData });
   } catch (err) {
     if (err.name === "ValidationError") {
-      return res
-        .status(INVALID_DATA)
-        .send({ message: "Invalid data provided" });
+      throw new BadRequestError("Invalid data provided");
     }
     return next(err);
   }
