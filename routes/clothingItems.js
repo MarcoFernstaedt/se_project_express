@@ -10,7 +10,7 @@ const {
 } = require("../controllers/clothingItems");
 
 router.get("/", getClothingItems);
-router.post("/", validateCardBody, authorizationMiddleware, createClothingItem);
+router.post("/", authorizationMiddleware, validateCardBody, createClothingItem);
 router.delete(
   "/:itemId",
   authorizationMiddleware,
