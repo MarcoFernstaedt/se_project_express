@@ -5,7 +5,6 @@ This project serves as the backend setup for the "WTWR" (What to Wear?) applicat
 
 ##Live Site##
 - **Front-End: https://www.wtwrweatherapp.twilightparadox.com
-- **Back-End: https://api.wtwrweatherapp.twilightparadox.com
 
 ## Scripts
 - **Start Server**: `npm start` (Runs the server using `node app.js`).
