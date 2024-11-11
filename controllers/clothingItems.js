@@ -2,18 +2,9 @@ const mongoose = require("mongoose");
 const validator = require("validator");
 const ClothingItems = require("../models/clothingItem");
 const BadRequestError = require("../errors/bad-request");
-const UnAuthorizedError = require("../errors/unauthorized");
 const NotFoundError = require("../errors/not-found");
-const ConflictError = require("../errors/conflict");
 const ForbiddenError = require("../errors/forbidden");
-const {
-  INVALID_DATA,
-  NOT_FOUND,
-  SERVER_ERROR,
-  CREATED,
-  OK,
-  FORBIDDEN,
-} = require("../utils/errors");
+const { CREATED, OK } = require("../utils/errors");
 
 module.exports.getClothingItems = async (req, res, next) => {
   try {

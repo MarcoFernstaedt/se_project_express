@@ -1,7 +1,6 @@
 const jwt = require("jsonwebtoken");
 const { UnauthorizedError } = require("../utils/errors");
 const { JWT_SECRET } = require("../utils/config");
-const UnauthorizedError = require("../errors/UnauthorizedError");
 
 module.exports.authorizationMiddleware = (req, res, next) => {
   const token = req.headers.authorization?.replace("Bearer ", "");

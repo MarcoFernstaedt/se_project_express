@@ -8,7 +8,6 @@ const {
 const userRoutes = require("./users");
 const clothingItemRoutes = require("./clothingItems");
 // Importing error codes
-const { NOT_FOUND } = require("../utils/errors");
 const NotFoundError = require("../errors/not-found");
 
 router.get("/crash-test", () => {

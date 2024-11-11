@@ -6,7 +6,7 @@ const BadRequestError = require("../errors/bad-request");
 const UnAuthorizedError = require("../errors/unauthorized");
 const NotFoundError = require("../errors/not-found");
 const ConflictError = require("../errors/conflict");
-const { OK, CREATED, INVALID_DATA } = require("../utils/errors");
+const { OK, CREATED } = require("../utils/errors");
 
 module.exports.login = async (req, res, next) => {
   const { email, password } = req.body;
