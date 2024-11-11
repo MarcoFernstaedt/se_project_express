@@ -8,7 +8,7 @@ const {
 } = require("../controllers/users");
 // importingg auth middleware
 const { authorizationMiddleware } = require("../middlewares/auth");
-const validateUpdateUserData = require("../middlewares/validation");
+const { validateUpdateUserData } = require("../middlewares/validation");
 
 // routes
 router.get("/me", authorizationMiddleware, getCurrentUser);
